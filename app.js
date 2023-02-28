@@ -3,6 +3,7 @@
 import express from 'express'
 import bodyParser from 'body-parser';
 import { mongoose,connect, Schema, model, set } from 'mongoose'
+import _ from 'lodash'
 mongoose.set('strictQuery', true);
 //const date = require(__dirname + "/date.js");
 
@@ -22,6 +23,9 @@ console.log("Connected");
  const item2 = new Item({ name: "Random Item 2"});
  const item3 = new Item({ name: "Random Item 3"});
  const defaultItems=[item1,item2,item3];
+
+ const listSchema={name:String,items:[itemsSchema]}
+const List=mongoose.model("List",listSchema)
 
 app.get("/", function(req, res) {
 Item.find({},function(err,fItem){
@@ -51,14 +55,45 @@ app.post("/", function(req, res){
   item.save();
  res.redirect("/");
 });
-
-app.get("/work", function(req,res){
-  res.render("list", {listTitle: "Work List", newListItems: workItems});
+//delete checked items
+app.post("/delete", function(req, res){
+  const checkedItemID=req.body.checkbox ;
+  Item.findByIdAndRemove(checkedItemID,function(err){
+    if(!err)
+    console.log("Successfully deleted the selected item");
+    else
+    console.log(err);
+    res.redirect("/");
+  })
+ 
 });
 
-app.get("/about", function(req, res){
-  res.render("about");
-});
+//realtime page fetch
+app.get('/:someText', function (req, res) {
+
+  const customListName = req.params.someText;
+ // console.log("Requested title= " + requestedTitle);
+      //res.render("list", {listTitle: requestedTitle, newListItems: defaultItems});
+ 
+ List.findOne({name:customListName},function(err,foundList){
+if(!err){
+  if(!foundList){
+   //create new list
+   const list=new List({name:customListName,items:defaultItems})
+   list.save(); 
+   res.redirect("/"+customListName)
+  }
+  else
+  {
+//show existing list
+res.render("list", {listTitle: foundList.name, newListItems: foundList.items});
+  }
+  
+}
+ })
+     
+})
+
 
 app.listen(3000, function() {
   console.log("Server started on port 3000");
