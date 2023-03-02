@@ -1,0 +1,25 @@
+<%-include('header') -%>
+ 
+    <div class="box" id="heading">
+        <h1><%= EJSlistTitle  %></h1>
+    </div>
+ 
+    <div class="box">
+            <%EJSnewitem.forEach(function(item){%>
+                <form action="/delete" method="post">
+                    <div class="item">
+                        <input type="checkbox" name="checkbox" value="<%= item._id%>" onChange="this.form.submit()">
+                        <p><%= item.name%></p>
+                    </div>
+                    <input type="hidden" name="listName" value= <%=EJSlistTitle%>>
+                    <!-- <input type="hidden" name="listID" value="<%=item._id%>"> -->
+                </form>
+            <%})%>
+            <form action="/" method="post" class="item">
+                <input type="text" name="newInput" placeholder="New Item" autocomplete="off">
+                <button type="submit" name="list" value=<%= EJSlistTitle %>>+</button>
+            </form>
+    </div>
+ 
+ 
+<%-include('footer') -%>
